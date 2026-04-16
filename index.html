@@ -300,6 +300,51 @@ footer strong{color:var(--or);}
   </div>
 </div>
 <script>
+// ─────────────────────────────────────────────
+// CLÉS localStorage
+// Chaque photo est sauvegardée dans sa propre
+// clé séparée → pas de limite de taille globale
+// ─────────────────────────────────────────────
+const KEY_META  = 'cha_meta';    // liste articles sans photos
+const KEY_PHOTO = 'cha_photo_';  // + id par article
+ 
+// Compression image avant sauvegarde (600×600, qualité 72%)
+function compressImg(dataUrl, cb) {
+  const img = new Image();
+  img.onload = function() {
+    const MAX = 600;
+    let w = img.width, h = img.height;
+    if (w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+    if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    c.getContext('2d').drawImage(img, 0, 0, w, h);
+    cb(c.toDataURL('image/jpeg', 0.72));
+  };
+  img.src = dataUrl;
+}
+ 
+function svP() {
+  // Sauvegarder uniquement les métadonnées (sans photo = léger)
+  const meta = prods.map(p => ({
+    id:p.id, name:p.name, cat:p.cat, prix:p.prix,
+    emoji:p.emoji, desc:p.desc, badge:p.badge
+  }));
+  localStorage.setItem(KEY_META, JSON.stringify(meta));
+}
+ 
+function ldP() {
+  const raw = localStorage.getItem(KEY_META);
+  if (!raw) return null;
+  try {
+    return JSON.parse(raw).map(p => ({
+      ...p,
+      // Recharger la photo depuis sa propre clé
+      photo: localStorage.getItem(KEY_PHOTO + p.id) || ''
+    }));
+  } catch(e) { return null; }
+}
+ 
 const DP=[
   {id:1,name:'Lot de 4 cuisses',cat:'cuisses',prix:1800,photo:'',emoji:'🦵',desc:'4 cuisses fraîches.',badge:'POPULAIRE'},
   {id:2,name:'Lot de 6 cuisses',cat:'cuisses',prix:2500,photo:'',emoji:'🦵',desc:'6 cuisses, portion généreuse.',badge:''},
@@ -313,18 +358,20 @@ const DP=[
   {id:10,name:'Gésiers x500g',cat:'gesiers',prix:1000,photo:'',emoji:'🫀',desc:'500g de gésiers frais.',badge:''},
   {id:11,name:'Gésiers x1kg',cat:'gesiers',prix:1800,photo:'',emoji:'🫀',desc:'1kg de gésiers.',badge:'ÉCONOMIQUE'},
 ];
-function ldP(){const s=localStorage.getItem('cha_v2');return s?JSON.parse(s):DP;}
-function svP(){localStorage.setItem('cha_v2',JSON.stringify(prods));}
-let prods=ldP(),nid=prods.length?Math.max(...prods.map(p=>p.id))+1:1,cart={},delMode='retrait',pPhoto='';
+ 
+let prods=ldP()||DP;
+let nid=prods.length?Math.max(...prods.map(p=>p.id))+1:1;
+let cart={},delMode='retrait',pPhoto='';
 const LF=500,AC='Yann-x14';
 const fmtN=n=>Math.round(n).toLocaleString('fr-FR');
 const G=id=>document.getElementById(id);
+ 
 function th(p,h=130){
   if(p.photo)return`<img src="${p.photo}" alt="${p.name}" style="width:100%;height:${h}px;object-fit:cover;display:block;">`;
   return`<div style="width:100%;height:${h}px;display:flex;align-items:center;justify-content:center;font-size:${h>80?'3.8rem':'1.5rem'};background:linear-gradient(135deg,var(--creme),var(--creme-d));">${p.emoji||'🍗'}</div>`;
 }
 function renderProds(f='tous'){
-  const g=G('pgrid'),cats={cuisses:'Cuisses',ailes:' Ailes',blancs:' Blancs',pates:'Pâtes',gesiers:'Gésiers'};
+  const g=G('pgrid'),cats={cuisses:'Cuisses',ailes:'Ailes',blancs:'Blancs',pates:'Pâtes',gesiers:'Gésiers'};
   G('slabel').innerHTML=(f==='tous'?'Nos Produits':cats[f]||f)+'<span style="flex:1;height:2px;display:inline-block;background:linear-gradient(90deg,var(--or),transparent);margin-left:.5rem;"></span>';
   const list=f==='tous'?prods:prods.filter(p=>p.cat===f);
   if(!list.length){g.innerHTML='<p style="color:var(--muted);font-size:.86rem;padding:.9rem 0;">Aucun article.</p>';return;}
@@ -380,27 +427,60 @@ function chkA(){
   else{G('apw').value='';G('apw').style.borderColor='var(--rouge)';setTimeout(()=>G('apw').style.borderColor='',1200);shT('❌ Code incorrect');}
 }
 function trigUp(){G('pinp').click();}
+ 
+// Compression automatique à l'upload
 function handlePh(e){
   const f=e.target.files[0];if(!f)return;
-  if(f.size>5*1024*1024){shT('⚠️ Photo trop lourde (max 5MB)');return;}
-  const r=new FileReader();
-  r.onload=ev=>{pPhoto=ev.target.result;const pp=G('pp'),ph=G('puph');pp.src=pPhoto;pp.classList.add('show');ph.style.display='none';};
-  r.readAsDataURL(f);
+  if(f.size>8*1024*1024){shT('⚠️ Photo trop lourde (max 8MB)');return;}
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    compressImg(ev.target.result,compressed=>{
+      pPhoto=compressed;
+      const pp=G('pp'),ph=G('puph');
+      pp.src=pPhoto;pp.classList.add('show');ph.style.display='none';
+    });
+  };
+  reader.readAsDataURL(f);
 }
+ 
 function clrPh(){pPhoto='';rPZ();G('pinp').value='';}
 function rPZ(){const pp=G('pp'),ph=G('puph');if(pp){pp.classList.remove('show');pp.src='';}if(ph)ph.style.display='block';}
+ 
 function addProd(){
   const nom=G('anom').value.trim(),cat=G('acat').value,prix=parseFloat(G('aprix').value),badge=G('abadge').value.trim().toUpperCase(),desc=G('adesc').value.trim();
   if(!nom){shT('⚠️ Nom requis');return;}if(!prix||prix<=0){shT('⚠️ Prix invalide');return;}
   const em={cuisses:'🦵',ailes:'🍗',blancs:'🐔',pates:'🍝',gesiers:'🫀'};
-  prods.push({id:nid++,name:nom,cat,prix,photo:pPhoto,emoji:em[cat]||'🍗',desc,badge});
-  svP();rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));
-  ['anom','aprix','abadge','adesc'].forEach(id=>G(id).value='');clrPh();
-  shT('✅ "'+nom+'" ajouté !');
+  const np={id:nid++,name:nom,cat,prix,photo:pPhoto,emoji:em[cat]||'🍗',desc,badge};
+  prods.push(np);
+ 
+  // Sauvegarder la photo dans sa propre clé dédiée
+  if(pPhoto){
+    try{
+      localStorage.setItem(KEY_PHOTO+np.id, pPhoto);
+    }catch(e){
+      shT('⚠️ Stockage plein, essayez une image plus petite');
+      prods.pop();return;
+    }
+  }
+ 
+  // Sauvegarder les métadonnées séparément
+  svP();
+  rAL();renderProds('tous');
+  document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));
+  ['anom','aprix','abadge','adesc'].forEach(id=>G(id).value='');
+  clrPh();
+  shT('✅ "'+nom+'" ajouté et sauvegardé définitivement !');
 }
+ 
 function delProd(id){
   const p=prods.find(x=>x.id===id);if(!confirm('Supprimer "'+p.name+'" ?'))return;
-  prods=prods.filter(x=>x.id!==id);delete cart[id];svP();updCart();rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));shT('🗑️ Supprimé');
+  prods=prods.filter(x=>x.id!==id);
+  delete cart[id];
+  // Supprimer aussi la photo de localStorage
+  localStorage.removeItem(KEY_PHOTO+id);
+  svP();updCart();rAL();renderProds('tous');
+  document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));
+  shT('🗑️ Supprimé');
 }
 function rAL(){
   G('acnt').textContent=prods.length;
