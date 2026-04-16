@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChickenHouseAbidjan 🍗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--rouge:#C0392B;--rouge-l:#E74C3C;--or:#F39C12;--or-l:#F8C471;--creme:#FDF6EC;--creme-d:#F5E6CC;--brun:#3D1C00;--brun-m:#6B3A1F;--tx:#2C1810;--muted:#8B6347;--blanc:#fff;--gris:#F8F4EF;--r:14px;--rs:8px;}
+*{margin:0;padding:0;box-sizing:border-box;}html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:whitesmoke;color:var(--tx);overflow-x:hidden;}
+.hero-header{background:linear-gradient(to right, #ff6a00 40%, rgba(255, 106, 0, 0.3) 65%, rgba(255, 106, 0, 0) 100%),url("./poulet\ roti.jpg");background-size:cover;background-position: right center;background-repeat: no-repeat ;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.hero-header::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(243,156,18,.04),rgba(243,156,18,.04) 2px,transparent 2px,transparent 28px);}
+.top-bar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.08);position:relative;z-index:2;flex-wrap:wrap;gap:.5rem;}
+.brand{display:flex;align-items:center;gap:.75rem;}
+.brand-text{font-family:'Bebas Neue',sans-serif;font-size:clamp(1.4rem,4vw,2rem);color:var(--or);letter-spacing:.04em;line-height:1;}
+.brand-sub{font-size:.62rem;color:whitesmoke;letter-spacing:.18em;text-transform:uppercase;}
+.cart-btn{display:flex;align-items:center;gap:.5rem;background:#ff6a00;color:#fff;border:none;border-radius:30px;padding:.52rem 1.1rem;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .2s;position:relative;}
+.cart-btn:hover{background:var(--rouge-l);}
+.cart-count{position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--or);color:var(--brun);font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;}
+.cart-count.show{opacity:1;}
+.hero-content{padding:2rem 1.5rem 2.5rem;position:relative;z-index:2;}
+.hero-tag{display:inline-block;background:rgba(243,156,18,.2);color:var(--or-l);font-size:.7rem;font-weight:600;letter-spacing:.15em;text-transform:uppercase;padding:.28rem .75rem;border-radius:20px;border:1px solid rgba(243,156,18,.3);margin-bottom:.8rem;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.2rem,7vw,4rem);color:#fff;letter-spacing:.02em;line-height:1.05;margin-bottom:.5rem;}
+.hero-title em{color:black;font-style:normal;}
+.hero-desc{color:whitesmoke;font-size:.88rem;max-width:400px;line-height:1.65;font-family:Roboto;font: bold;}
+.cat-nav{display:flex;gap:.45rem;padding:.8rem 1.1rem;background:var(--blanc);border-bottom:2px solid var(--creme-d);overflow-x:auto;position:sticky;top:0;z-index:50;scrollbar-width:none;box-shadow:0 2px 12px rgba(0,0,0,.06);}
+.cat-nav::-webkit-scrollbar{display:none;}
+.cat-pill{flex-shrink:0;padding:.4rem .95rem;border-radius:20px;font-size:.76rem;font-weight:600;cursor:pointer;border:1.5px solid transparent;transition:all .18s;background:var(--gris);color:var(--muted);font-family: Roboto;text-transform: uppercase; font: bold;}
+.cat-pill:hover{border-color:var(--or);color:var(--brun);}
+.cat-pill.on{background:#ff6a00 ;color:#fff;border-color:#ff6a00 ;}
+main{display:grid;grid-template-columns:1fr;max-width:1100px;margin:0 auto;padding:1.4rem 1rem;}
+@media(min-width:900px){main{grid-template-columns:1fr 340px;gap:1.5rem;align-items:start;}}
+.sec-label{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.05em;color:var(--brun);margin-bottom:.9rem;display:flex;align-items:center;}
+.sec-label::after{content:'';flex:1;height:2px;background:linear-gradient(90deg,var(--or),transparent);margin-left:.5rem;}
+.products-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.8rem;margin-bottom:2rem;}
+.prod-card{background:var(--blanc);border-radius:var(--r);border:1.5px solid var(--creme-d);overflow:hidden;transition:all .2s;position:relative;}
+.prod-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(192,57,43,.12);border-color:var(--or);}
+.prod-thumb{height:130px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--creme),var(--creme-d));}
+.prod-thumb img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .3s;}
+.prod-card:hover .prod-thumb img{transform:scale(1.06);}
+.prod-thumb-ph{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:3.8rem;background:linear-gradient(135deg,var(--creme),var(--creme-d));}
+.prod-badge{position:absolute;top:6px;right:6px;background:#ff6a00 ;color:#fff;font-size:.58rem;font-weight:700;padding:.18rem .48rem;border-radius:10px;text-transform:uppercase;z-index:2;}
+.prod-body{padding:.72rem .82rem;}
+.prod-name{font-weight:700;font-size:.86rem;color:var(--brun);margin-bottom:.18rem;line-height:1.3;}
+.prod-desc{font-size:.7rem;color:var(--muted);line-height:1.5;margin-bottom:.55rem;}
+.prod-foot{display:flex;align-items:center;justify-content:space-between;}
+.prod-price{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:#ff6a00 ;}
+.add-btn{width:28px;height:28px;border-radius:50%;background:#ff6a00 ;color:#fff;border:none;font-size:1rem;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-weight:700;}
+.add-btn:hover{background:orange;transform:scale(1.1);}
+.qty-ctrl{display:flex;align-items:center;gap:.3rem;}
+.qty-btn{width:25px;height:25px;border-radius:50%;border:1.5px solid var(--creme-d);background:var(--blanc);cursor:pointer;font-size:.85rem;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .15s;color:var(--brun);}
+.qty-btn:hover{background:var(--rouge);color:#fff;border-color:var(--rouge);}
+.qty-num{font-weight:700;font-size:.82rem;min-width:14px;text-align:center;}
+.cart-panel{background:var(--blanc);border-radius:var(--r);border:1.5px solid var(--creme-d);position:sticky;top:65px;box-shadow:0 4px 20px rgba(0,0,0,.06);}
+.cart-header{background:#ff6a00 ;color:#fff;padding:.85rem 1rem;border-radius:var(--r) var(--r) 0 0;display:flex;align-items:center;justify-content:space-between;}
+.cart-title{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.05em;}
+.cart-body{padding:.9rem;min-height:80px;}
+.cart-empty{text-align:center;padding:1.4rem;color:var(--muted);font-size:.83rem;}
+.ti{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;border-bottom:1px dashed var(--creme-d);}
+.ti:last-child{border-bottom:none;}
+.ti-l{display:flex;align-items:center;gap:.45rem;flex:1;}
+.ti-img{width:32px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0;}
+.ti-ph{width:32px;height:32px;border-radius:6px;background:var(--creme-d);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem;}
+.ti-name{font-weight:600;color:#ff6a00 ;font-size:.78rem;line-height:1.2;}
+.ti-qty{font-size:.68rem;color:var(--muted);}
+.ti-price{font-weight:700;color:#ff6a00 ;font-family:'Bebas Neue',sans-serif;font-size:.95rem;white-space:nowrap;margin-left:.35rem;}
+.ti-rm{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.85rem;padding:.1rem .28rem;border-radius:4px;transition:all .15s;}
+.ti-rm:hover{color:#ff6a00 ;}
+.cart-footer{padding:.8rem .95rem;border-top:2px solid var(--creme-d);}
+.tl{display:flex;justify-content:space-between;font-size:.8rem;padding:.18rem 0;color:var(--muted);}
+.tt{display:flex;justify-content:space-between;align-items:center;font-weight:700;margin-top:.45rem;padding-top:.45rem;border-top:1.5px solid #ff6a00 ;font-size:.95rem;color:#ff6a00 ;}
+.tt .tv{font-family:'Bebas Neue',sans-serif;font-size:1.35rem;color:#ff6a00 ;}
+.order-btn{width:100%;margin-top:.8rem;padding:.7rem;background:#ff6a00 ;color:#fff;border:none;border-radius:var(--rs);font-size:.88rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.order-btn:hover{background:orange;}
+.clear-btn{width:100%;margin-top:.35rem;padding:.45rem;background:transparent;color:var(--muted);border:1px solid var(--creme-d);border-radius:var(--rs);font-size:.72rem;cursor:pointer;transition:all .15s;}
+.clear-btn:hover{border-color:var(--rouge);color:var(--rouge);}
+.mob-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:80;background:#ff6a00 ;color:#fff;padding:.8rem 1.2rem;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:0 -4px 20px rgba(0,0,0,.15);}
+.mob-bar-info{display:flex;align-items:center;gap:.55rem;font-weight:600;font-size:.85rem;}
+.mob-bar-price{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;}
+@media(max-width:899px){.mob-bar{display:flex;}.cart-panel{display:none;}}
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(44,24,16,.86);align-items:center;justify-content:center;padding:1rem;overflow-y:auto;}
+.ov.on{display:flex;}
+.om{background:var(--blanc);border-radius:var(--r);width:100%;max-width:500px;overflow:hidden;max-height:90vh;overflow-y:auto;animation:su .3s ease;}
+@keyframes su{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.mh{background:#ff6a00 ;color:#fff;padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;}
+.mt{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;letter-spacing:.05em;}
+.mx{background:none;border:none;color:rgba(255,255,255,.55);font-size:1.25rem;cursor:pointer;}
+.mb{padding:1.25rem;}
+.recap{background:var(--creme);border:1.5px solid var(--creme-d);border-radius:var(--rs);padding:.95rem;margin-bottom:1.1rem;}
+.rt{font-weight:700;font-size:.78rem;color:var(--brun);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.08em;}
+.rr{display:flex;justify-content:space-between;font-size:.8rem;padding:.22rem 0;align-items:center;}
+.rr .rv{font-weight:700;color:var#ff6a00 ;}
+.rtot{display:flex;justify-content:space-between;border-top:1.5px solid var(--brun-m);margin-top:.45rem;padding-top:.45rem;font-weight:700;font-size:.9rem;}
+.rtot .rtv{font-family:'Bebas Neue',sans-serif;font-size:1.25rem;color:#ff6a00 ;}
+.dtabs{display:flex;gap:.45rem;margin-bottom:1rem;}
+.dtab{flex:1;padding:.55rem;border-radius:var(--rs);border:1.5px solid var(--creme-d);text-align:center;cursor:pointer;transition:all .18s;font-size:.78rem;font-weight:600;color:var(--muted);background:var(--gris);}
+.dtab.on{background:#ff6a00 ;color:#fff;border-color:var(--brun);}
+.dtab-ic{font-size:1.3rem;display:block;margin-bottom:.18rem;}
+.fg{margin-bottom:.8rem;}
+label.lb{display:block;font-size:.68rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.32rem;}
+input[type=text],input[type=tel],textarea,select.sel{width:100%;padding:.55rem .82rem;background:var(--gris);border:1.5px solid var(--creme-d);border-radius:var(--rs);color:var(--tx);font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s;}
+input:focus,textarea:focus,select.sel:focus{border-color:var(--rouge);}
+textarea{resize:vertical;min-height:65px;}
+.cfm-btn{width:100%;padding:.75rem;background:#ff6a00 ;color:#fff;border:none;border-radius:var(--rs);font-size:.9rem;font-weight:700;cursor:pointer;transition:all .2s;margin-top:.45rem;}
+.cfm-btn:hover{background:var(--rouge-l);}
+.ss{text-align:center;padding:2.2rem 1.2rem;}
+.si{font-size:3.8rem;margin-bottom:.9rem;animation:bn .6s ease;}
+@keyframes bn{0%,100%{transform:scale(1)}50%{transform:scale(1.18)}}
+.stit{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;color:var(--brun);letter-spacing:.05em;margin-bottom:.4rem;}
+.smsg{color:var(--muted);font-size:.85rem;line-height:1.65;margin-bottom:1.4rem;}
+.on-num{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:var(--rouge);background:var(--creme);border:1.5px dashed var(--or);border-radius:var(--rs);padding:.6rem 1.1rem;display:inline-block;letter-spacing:.1em;}
+.tp{background:var(--blanc);border:1.5px solid var(--creme-d);border-radius:var(--rs);padding:.95rem;margin-top:1.1rem;text-align:left;font-size:.76rem;}
+.tph{text-align:center;margin-bottom:.7rem;padding-bottom:.45rem;border-bottom:1px dashed var(--creme-d);}
+.tpb{font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--brun);}
+.tpr{display:flex;justify-content:space-between;padding:.18rem 0;}
+.tps{border:none;border-top:1px dashed var(--creme-d);margin:.35rem 0;}
+.tptot{display:flex;justify-content:space-between;font-weight:700;font-size:.88rem;color:var(--brun);}
+.prnt{margin-top:.8rem;padding:.5rem 1.1rem;background:var(--brun);color:#fff;border:none;border-radius:var(--rs);font-size:.76rem;font-weight:600;cursor:pointer;}
+.mob-cs{display:none;position:fixed;inset:0;z-index:150;background:rgba(44,24,16,.86);align-items:flex-end;}
+.mob-cs.on{display:flex;}
+.mob-sh{background:var(--blanc);border-radius:var(--r) var(--r) 0 0;width:100%;max-height:80vh;overflow-y:auto;animation:su .25s ease;}
+.mob-sh-head{background:#ff6a00 ;color:#fff;padding:.85rem 1rem;display:flex;align-items:center;justify-content:space-between;}
+.admin-ov{display:none;position:fixed;inset:0;z-index:300;background:rgba(0,0,0,.96);overflow-y:auto;}
+.admin-ov.on{display:block;}
+.aw{max-width:820px;margin:0 auto;padding:1.4rem 1rem 4rem;}
+.ah{display:flex;align-items:center;justify-content:space-between;padding:.95rem 1.2rem;background:var(--rouge);border-radius:var(--r);margin-bottom:1.1rem;}
+.at{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;color:#fff;letter-spacing:.05em;}
+.ac{background:rgba(255,255,255,.2);color:#fff;border:none;border-radius:8px;padding:.38rem .85rem;cursor:pointer;font-size:.8rem;}
+.as{background:#1E1E1E;border-radius:var(--r);padding:1.1rem;margin-bottom:1rem;color:#F0F0F0;}
+.ast{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--or);letter-spacing:.05em;margin-bottom:.9rem;}
+.af{margin-bottom:.8rem;}
+.af label{display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:.32rem;}
+.af input,.af select,.af textarea{width:100%;padding:.55rem .82rem;background:#2A2A2A;border:1.5px solid #3A3A3A;border-radius:var(--rs);color:#F0F0F0;font-family:'DM Sans',sans-serif;font-size:.86rem;outline:none;transition:border-color .2s;}
+.af input:focus,.af select:focus,.af textarea:focus{border-color:var(--or);}
+.af textarea{resize:vertical;min-height:55px;}
+.af-r{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+.puz{border:2px dashed #3A3A3A;border-radius:var(--rs);padding:1.1rem;text-align:center;cursor:pointer;transition:all .2s;background:#2A2A2A;position:relative;overflow:hidden;}
+.puz:hover{border-color:var(--or);}
+.pp{width:100%;height:140px;object-fit:cover;border-radius:var(--rs);display:none;margin-bottom:.45rem;}
+.pp.show{display:block;}
+.pui{font-size:1.9rem;margin-bottom:.35rem;opacity:.45;}
+.put{font-size:.75rem;color:rgba(255,255,255,.35);}
+.put strong{color:var(--or);}
+.aab{background:var(--or);color:var(--brun);border:none;border-radius:var(--rs);padding:.6rem 1.25rem;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;}
+.aab:hover{background:var(--or-l);}
+.apl{display:grid;gap:.6rem;}
+.api{background:#2A2A2A;border-radius:var(--rs);border:1px solid #3A3A3A;padding:.8rem;display:flex;align-items:center;gap:.8rem;justify-content:space-between;flex-wrap:wrap;}
+.api-l{display:flex;align-items:center;gap:.7rem;flex:1;}
+.api-img{width:50px;height:50px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+.api-ph{width:50px;height:50px;border-radius:8px;background:#3A3A3A;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;}
+.api-n{font-weight:700;font-size:.85rem;color:#F0F0F0;}
+.api-p{font-family:'Bebas Neue',sans-serif;font-size:.95rem;color:var(--or);}
+.api-c{font-size:.65rem;color:rgba(255,255,255,.38);}
+.db{background:#922B21;color:#fff;border:none;border-radius:var(--rs);padding:.38rem .82rem;font-size:.72rem;font-weight:600;cursor:pointer;flex-shrink:0;}
+.db:hover{background:var(--rouge-l);}
+.alog{max-width:350px;margin:3.5rem auto;background:#1E1E1E;border-radius:var(--r);padding:1.8rem;text-align:center;}
+.alog h2{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;color:var(--or);margin-bottom:.4rem;}
+.alog p{color:rgba(255,255,255,.35);font-size:.8rem;margin-bottom:1.3rem;}
+.alog input{width:100%;padding:.58rem .85rem;background:#2A2A2A;border:1.5px solid #3A3A3A;border-radius:var(--rs);color:#F0F0F0;font-family:'DM Sans',sans-serif;font-size:.88rem;outline:none;margin-bottom:.8rem;transition:border-color .2s;}
+.alog input:focus{border-color:var(--or);}
+.alog button{width:100%;padding:.62rem;background:var(--rouge);color:#fff;border:none;border-radius:var(--rs);font-weight:700;cursor:pointer;}
+footer{background:black;color:rgba(255,255,255,.45);text-align:center;padding:1.8rem 1rem;font-size:.76rem;margin-top:2rem;}
+footer strong{color:var(--or);}
+.alink{color:rgba(255,255,255,.12);cursor:pointer;font-size:.62rem;transition:color .2s;margin-top:.5rem;display:inline-block;user-select:none;}
+.alink:hover{color:rgba(255,255,255,.35);}
+.toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);z-index:500;background:var(--brun);color:#fff;padding:.6rem 1.3rem;border-radius:30px;font-size:.8rem;font-weight:600;display:none;white-space:nowrap;box-shadow:0 4px 18px rgba(0,0,0,.25);animation:fu .25s ease;}
+.toast.on{display:block;}
+@keyframes fu{from{opacity:0;transform:translateX(-50%) translateY(7px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@media(max-width:480px){.af-r{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="hero-header">
+  <div class="top-bar">
+    <div class="brand">
+      <span style="font-size:2rem;"></span>
+      <div><div class="brand-text"><span style="color:#fff;">ChickenHouseAbidjan</span></div><div class="brand-sub">Frais · Savoureux · Livré</div></div>
+    </div>
+    <button class="cart-btn" onclick="openMob()">🛒 Mon panier<span class="cart-count" id="cc">0</span></button>
+  </div>
+  <div class="hero-content">
+    <h1 class="hero-title">Du <em>Poulet Frais</em><br>Livré chez vous</h1>
+    <p class="hero-desc">Cuisses, ailes, blancs, pâtes, gésiers — choisis tes morceaux préférés.</p>
+    
+  </div>
+</div>
+<nav class="cat-nav">
+  <div class="cat-pill on" onclick="filt('tous',this)"> Tous</div>
+  <div class="cat-pill" onclick="filt('cuisses',this)"> Cuisses</div>
+  <div class="cat-pill" onclick="filt('ailes',this)">Ailes</div>
+  <div class="cat-pill" onclick="filt('blancs',this)">Blancs</div>
+  <div class="cat-pill" onclick="filt('pates',this)">Pâtes</div>
+  <div class="cat-pill" onclick="filt('gesiers',this)">Gésiers</div>
+</nav>
+<main>
+  <div>
+    <div class="sec-label" id="slabel">Nos Produits</div>
+    <div class="products-grid" id="pgrid"></div>
+  </div>
+  <div class="cart-panel">
+    <div class="cart-header"><span class="cart-title">🧾 Mon Panier</span><span style="font-size:.72rem;opacity:.55;" id="cic">0 article</span></div>
+    <div class="cart-body" id="cbody"><div class="cart-empty"><div style="font-size:2.3rem;margin-bottom:.4rem;">🛒</div><div>Votre panier est vide</div></div></div>
+    <div id="cfooter" style="display:none;" class="cart-footer">
+      <div class="tl"><span>Sous-total</span><span id="dst">0 FCFA</span></div>
+      <div class="tl"><span>Livraison</span><span id="dlv">À définir</span></div>
+      <div class="tt"><span>Total</span><span class="tv" id="dtot">0 FCFA</span></div>
+      <button class="order-btn" onclick="openOrder()">✅ Valider la commande</button>
+      <button class="clear-btn" onclick="clearCart()">🗑️ Vider le panier</button>
+    </div>
+  </div>
+</main>
+<div class="mob-bar" id="mobbar" onclick="openMob()">
+  <div class="mob-bar-info"><span>🛒</span><span id="mobcnt">0 article</span></div>
+  <div class="mob-bar-price" id="mobtot">0 FCFA</div>
+</div>
+<div class="mob-cs" id="mobcs">
+  <div class="mob-sh">
+    <div class="mob-sh-head"><span style="font-family:'Bebas Neue',sans-serif;font-size:1.15rem;letter-spacing:.05em;">🧾 Mon Panier</span><button style="background:rgba(255,255,255,.15);color:#fff;border:none;border-radius:8px;padding:.32rem .75rem;cursor:pointer;font-size:.78rem;" onclick="closeMob()">Fermer</button></div>
+    <div style="padding:.9rem;" id="mobcbody"></div>
+    <div style="padding:.8rem .9rem;border-top:2px solid var(--creme-d);">
+      <div class="tt"><span>Total</span><span class="tv" id="mobtot2">0 FCFA</span></div>
+      <button class="order-btn" onclick="closeMob();openOrder();" style="margin-top:.7rem;">✅ Valider la commande</button>
+      <button class="clear-btn" onclick="clearCart();closeMob();">🗑️ Vider le panier</button>
+    </div>
+  </div>
+</div>
+<div class="ov" id="oov">
+  <div class="om">
+    <div class="mh"><span class="mt">📋 Valider ma commande</span><button class="mx" onclick="closeOrder()">✕</button></div>
+    <div class="mb" id="ombody">
+      <div class="recap" id="orecap"></div>
+      <div style="margin-bottom:.8rem;"><label class="lb">Mode de récupération</label>
+        <div class="dtabs">
+          <div class="dtab on" id="dtr" onclick="setDel('retrait')"><span class="dtab-ic">🏪</span>En boutique</div>
+          <div class="dtab" id="dlv2" onclick="setDel('livraison')"><span class="dtab-ic">🛵</span>Livraison</div>
+        </div>
+      </div>
+      <div class="fg"><label class="lb">Votre nom *</label><input type="text" id="onom" placeholder="Ex: Kofi Mensah"></div>
+      <div class="fg"><label class="lb">Téléphone *</label><input type="tel" id="otel" placeholder="07 00 00 00 00"></div>
+      <div id="adwrap" style="display:none;">
+        <div class="fg"><label class="lb">Adresse *</label><input type="text" id="oadr" placeholder="Quartier, rue..."></div>
+        <div class="fg"><label class="lb">Commune</label><select class="sel" id="ocom"><option value="">Choisir</option><option>Cocody</option><option>Plateau</option><option>Adjamé</option><option>Yopougon</option><option>Abobo</option><option>Marcory</option><option>Treichville</option><option>Koumassi</option><option>Port-Bouët</option><option>Attécoubé</option><option>Bingerville</option></select></div>
+        <div style="background:#ff6a00 ;border-radius:var(--rs);padding:.6rem .82rem;font-size:.76rem;color:var(--brun-m);margin-bottom:.8rem;">🛵 Frais de livraison : <strong>500 FCFA</strong></div>
+      </div>
+      <div class="fg"><label class="lb">Notes (optionnel)</label><textarea id="onotes" placeholder="Sans piment, livraison après 18h..."></textarea></div>
+      <button class="cfm-btn" onclick="confirmOrder()">Confirmer ma commande</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+<footer>
+  <div><strong>ChickenHouseAbidjan</strong> </div>
+  <div style="margin-top:.35rem;">Abidjan, Côte d'Ivoire · 7j/7</div>
+  <div style="margin-top:.9rem;"><span class="alink" onclick="openAL()">⚙</span></div>
+</footer>
+<div class="admin-ov" id="aov">
+  <div class="aw">
+    <div id="alwrap">
+      <div class="alog">
+        <h2>🔐 Admin</h2>
+        <p>Panneau ChickenHouseAbidjan</p>
+        <input type="password" id="apw" placeholder="Code d'accès" onkeydown="if(event.key==='Enter')chkA()">
+        <button onclick="chkA()">Accéder →</button>
+        <div style="margin-top:.8rem;"><button onclick="closeA()" style="background:transparent;color:rgba(255,255,255,.3);border:none;cursor:pointer;font-size:.76rem;">Annuler</button></div>
+      </div>
+    </div>
+    <div id="apwrap" style="display:none;">
+      <div class="ah"><span class="at">⚙️ Panel Admin — ChickenHouseAbidjan</span><button class="ac" onclick="closeA()">✕ Fermer</button></div>
+      <div class="as">
+        <div class="ast">📸 Ajouter un article</div>
+        <div class="af">
+          <label>Photo du produit *</label>
+          <div class="puz" id="puz" onclick="trigUp()">
+            <img class="pp" id="pp" src="" alt="Aperçu">
+            <div id="puph"><div class="pui">📷</div><div class="put"><strong>Cliquer pour choisir une photo</strong><br>JPG, PNG, WEBP — Max 5MB</div></div>
+            <input type="file" id="pinp" accept="image/*" onchange="handlePh(event)" style="display:none;">
+          </div>
+          <div style="margin-top:.35rem;"><button onclick="clrPh()" style="background:#3A3A3A;color:rgba(255,255,255,.55);border:none;border-radius:6px;padding:.28rem .65rem;font-size:.7rem;cursor:pointer;">🗑️ Retirer la photo</button></div>
+        </div>
+        <div class="af-r">
+          <div class="af"><label>Nom de l'article *</label><input type="text" id="anom" placeholder="Ex: Lot de 6 cuisses"></div>
+          <div class="af"><label>Catégorie *</label><select id="acat"><option value="cuisses">🦵 Cuisses</option><option value="ailes">🍗 Ailes</option><option value="blancs">🐔 Blancs</option><option value="pates">🍝 Pâtes</option><option value="gesiers">🫀 Gésiers</option></select></div>
+        </div>
+        <div class="af-r">
+          <div class="af"><label>Prix (FCFA) *</label><input type="number" id="aprix" placeholder="Ex: 2500" min="0"></div>
+          <div class="af"><label>Badge promo</label><input type="text" id="abadge" placeholder="NOUVEAU, PROMO..."></div>
+        </div>
+        <div class="af"><label>Description courte</label><textarea id="adesc" placeholder="Ex: 6 cuisses fraîches marinées..."></textarea></div>
+        <button class="aab" onclick="addProd()">➕ Ajouter l'article</button>
+      </div>
+      <div class="as">
+        <div class="ast">📦 Articles en ligne (<span id="acnt">0</span>)</div>
+        <div class="apl" id="apl"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const DP=[
+  {id:1,name:'Lot de 4 cuisses',cat:'cuisses',prix:1800,photo:'',emoji:'🦵',desc:'4 cuisses fraîches.',badge:'POPULAIRE'},
+  {id:2,name:'Lot de 6 cuisses',cat:'cuisses',prix:2500,photo:'',emoji:'🦵',desc:'6 cuisses, portion généreuse.',badge:''},
+  {id:3,name:'Lot de 10 cuisses',cat:'cuisses',prix:3800,photo:'',emoji:'🦵',desc:'Grand lot de 10 cuisses.',badge:'ÉCONOMIQUE'},
+  {id:4,name:'Lot de 6 ailes',cat:'ailes',prix:1200,photo:'',emoji:'🍗',desc:'6 ailes croustillantes.',badge:''},
+  {id:5,name:'Lot de 12 ailes',cat:'ailes',prix:2200,photo:'',emoji:'🍗',desc:'12 ailes pour une soirée.',badge:'POPULAIRE'},
+  {id:6,name:'Blanc x2',cat:'blancs',prix:2000,photo:'',emoji:'🐔',desc:'2 blancs tendres.',badge:''},
+  {id:7,name:'Blanc x4',cat:'blancs',prix:3800,photo:'',emoji:'🐔',desc:'4 blancs pour grillades.',badge:''},
+  {id:8,name:'Pâtes x500g',cat:'pates',prix:1500,photo:'',emoji:'🍝',desc:'500g de pâtes fraîches.',badge:'NOUVEAU'},
+  {id:9,name:'Pâtes x1kg',cat:'pates',prix:2800,photo:'',emoji:'🍝',desc:'1kg de pâtes.',badge:''},
+  {id:10,name:'Gésiers x500g',cat:'gesiers',prix:1000,photo:'',emoji:'🫀',desc:'500g de gésiers frais.',badge:''},
+  {id:11,name:'Gésiers x1kg',cat:'gesiers',prix:1800,photo:'',emoji:'🫀',desc:'1kg de gésiers.',badge:'ÉCONOMIQUE'},
+];
+function ldP(){const s=localStorage.getItem('cha_v2');return s?JSON.parse(s):DP;}
+function svP(){localStorage.setItem('cha_v2',JSON.stringify(prods));}
+let prods=ldP(),nid=prods.length?Math.max(...prods.map(p=>p.id))+1:1,cart={},delMode='retrait',pPhoto='';
+const LF=500,AC='Yann-x14';
+const fmtN=n=>Math.round(n).toLocaleString('fr-FR');
+const G=id=>document.getElementById(id);
+function th(p,h=130){
+  if(p.photo)return`<img src="${p.photo}" alt="${p.name}" style="width:100%;height:${h}px;object-fit:cover;display:block;">`;
+  return`<div style="width:100%;height:${h}px;display:flex;align-items:center;justify-content:center;font-size:${h>80?'3.8rem':'1.5rem'};background:linear-gradient(135deg,var(--creme),var(--creme-d));">${p.emoji||'🍗'}</div>`;
+}
+function renderProds(f='tous'){
+  const g=G('pgrid'),cats={cuisses:'Cuisses',ailes:' Ailes',blancs:' Blancs',pates:'Pâtes',gesiers:'Gésiers'};
+  G('slabel').innerHTML=(f==='tous'?'Nos Produits':cats[f]||f)+'<span style="flex:1;height:2px;display:inline-block;background:linear-gradient(90deg,var(--or),transparent);margin-left:.5rem;"></span>';
+  const list=f==='tous'?prods:prods.filter(p=>p.cat===f);
+  if(!list.length){g.innerHTML='<p style="color:var(--muted);font-size:.86rem;padding:.9rem 0;">Aucun article.</p>';return;}
+  g.innerHTML=list.map(p=>{const q=cart[p.id]||0;return`<div class="prod-card" id="card-${p.id}"><div class="prod-thumb">${th(p,130)}${p.badge?`<span class="prod-badge">${p.badge}</span>`:''}</div><div class="prod-body"><div class="prod-name">${p.name}</div><div class="prod-desc">${p.desc||''}</div><div class="prod-foot" id="foot-${p.id}"><div class="prod-price">${fmtN(p.prix)} F</div>${q===0?`<button class="add-btn" onclick="addC(${p.id})">+</button>`:`<div class="qty-ctrl"><button class="qty-btn" onclick="chQ(${p.id},-1)">−</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="chQ(${p.id},1)">+</button></div>`}</div></div></div>`;}).join('');
+}
+function filt(f,el){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('on'));if(el)el.classList.add('on');renderProds(f);}
+function rfFoot(id){
+  const q=cart[id]||0,p=prods.find(x=>x.id===id),f=G('foot-'+id);
+  if(!f||!p)return;
+  f.innerHTML=`<div class="prod-price">${fmtN(p.prix)} F</div>${q===0?`<button class="add-btn" onclick="addC(${id})">+</button>`:`<div class="qty-ctrl"><button class="qty-btn" onclick="chQ(${id},-1)">−</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="chQ(${id},1)">+</button></div>`}`;
+}
+function addC(id){cart[id]=(cart[id]||0)+1;updCart();rfFoot(id);shT('✅ '+prods.find(x=>x.id===id).name+' ajouté !');}
+function chQ(id,d){cart[id]=Math.max(0,(cart[id]||0)+d);if(!cart[id])delete cart[id];updCart();rfFoot(id);}
+function clearCart(){cart={};document.querySelectorAll('.cat-pill').forEach((p,i)=>p.classList.toggle('on',i===0));renderProds('tous');updCart();}
+function gTot(){return Object.entries(cart).reduce((s,[id,q])=>{const p=prods.find(x=>x.id===+id);return s+(p?p.prix*q:0);},0);}
+function gCnt(){return Object.values(cart).reduce((a,b)=>a+b,0);}
+function ciHTML(){return Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';const img=p.photo?`<img class="ti-img" src="${p.photo}" alt="">`:`<div class="ti-ph">${p.emoji||'🍗'}</div>`;return`<div class="ti"><div class="ti-l">${img}<div><div class="ti-name">${p.name}</div><div class="ti-qty">x${q} × ${fmtN(p.prix)} F</div></div></div><span class="ti-price">${fmtN(p.prix*q)} F</span><button class="ti-rm" onclick="chQ(${id},-${q})">✕</button></div>`;}).join('');}
+function updCart(){
+  const tot=gTot(),cnt=gCnt(),lf=delMode==='livraison'?LF:0,gt=tot+lf;
+  const cc=G('cc');cc.textContent=cnt;cnt?cc.classList.add('show'):cc.classList.remove('show');
+  const cb=G('cbody'),cf=G('cfooter');
+  G('cic').textContent=cnt+(cnt<=1?' article':' articles');
+  if(!cnt){cb.innerHTML='<div class="cart-empty"><div style="font-size:2.3rem;margin-bottom:.4rem;">🛒</div><div>Votre panier est vide</div></div>';cf.style.display='none';}
+  else{cb.innerHTML=ciHTML();cf.style.display='block';G('dst').textContent=fmtN(tot)+' FCFA';G('dlv').textContent=delMode==='livraison'?fmtN(LF)+' FCFA':'Gratuit';G('dtot').textContent=fmtN(gt)+' FCFA';}
+  const mb=G('mobbar');
+  if(cnt){mb.style.display='flex';G('mobcnt').textContent=cnt+(cnt<=1?' article':' articles');G('mobtot').textContent=fmtN(gt)+' FCFA';}else mb.style.display='none';
+  G('mobcbody').innerHTML=cnt?ciHTML():'';G('mobtot2').textContent=fmtN(gt)+' FCFA';
+}
+function openMob(){G('mobcs').classList.add('on');}
+function closeMob(){G('mobcs').classList.remove('on');}
+function openOrder(){if(!gCnt()){shT('⚠️ Panier vide');return;}bldRecap();G('oov').classList.add('on');}
+function closeOrder(){G('oov').classList.remove('on');}
+function setDel(m){delMode=m;G('dtr').classList.toggle('on',m==='retrait');G('dlv2').classList.toggle('on',m==='livraison');G('adwrap').style.display=m==='livraison'?'block':'none';bldRecap();updCart();}
+function bldRecap(){
+  const tot=gTot(),lf=delMode==='livraison'?LF:0,gt=tot+lf;
+  const rows=Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';const img=p.photo?`<img src="${p.photo}" style="width:26px;height:26px;border-radius:4px;object-fit:cover;margin-right:.35rem;vertical-align:middle;" alt="">`:`<span style="margin-right:.35rem;">${p.emoji||''}</span>`;return`<div class="rr"><span>${img}${p.name} ×${q}</span><span class="rv">${fmtN(p.prix*q)} F</span></div>`;}).join('');
+  G('orecap').innerHTML=`<div class="rt">🧾 Récapitulatif</div>${rows}${delMode==='livraison'?`<div class="rr"><span>🛵 Livraison</span><span class="rv">${fmtN(LF)} F</span></div>`:''}<div class="rtot"><span>Total</span><span class="rtv">${fmtN(gt)} FCFA</span></div>`;
+}
+function genN(){return'CHA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);}
+function confirmOrder(){
+  const nom=G('onom').value.trim(),tel=G('otel').value.trim(),adr=G('oadr')?.value.trim()||'';
+  if(!nom){shT('⚠️ Nom requis');return;}if(!tel||tel.length<8){shT('⚠️ Téléphone invalide');return;}
+  if(delMode==='livraison'&&!adr){shT('⚠️ Adresse requise');return;}
+  const num=genN(),tot=gTot(),lf=delMode==='livraison'?LF:0,gt=tot+lf,notes=G('onotes').value.trim(),com=G('ocom')?.value||'',now=new Date().toLocaleString('fr-FR');
+  const rows=Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';return`<div class="tpr"><span>${p.name} ×${q}</span><span>${fmtN(p.prix*q)} F</span></div>`;}).join('');
+  G('ombody').innerHTML=`<div class="ss"><div class="si">🎉</div><div class="stit">Commande confirmée !</div><p class="smsg">Merci <strong>${nom}</strong> !<br>${delMode==='livraison'?'🛵 Un livreur viendra sous peu.':'🏪 Venez récupérer en boutique.'}</p><div class="on-num">${num}</div><div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;">Conservez ce numéro</div><div class="tp"><div class="tph"><div class="tpb">🍗 ChickenHouseAbidjan</div><div style="font-size:.65rem;opacity:.55;">${now}</div></div><div class="tpr"><span>N°</span><span><strong>${num}</strong></span></div><div class="tpr"><span>Client</span><span>${nom}</span></div><div class="tpr"><span>Tél</span><span>${tel}</span></div><div class="tpr"><span>Mode</span><span>${delMode==='livraison'?'🛵 Livraison':'🏪 Retrait'}</span></div>${delMode==='livraison'?`<div class="tpr"><span>Adresse</span><span>${adr}${com?', '+com:''}</span></div>`:''}<hr class="tps">${rows}${delMode==='livraison'?`<div class="tpr"><span>Livraison</span><span>${fmtN(LF)} F</span></div>`:''}<hr class="tps"><div class="tptot"><span>TOTAL</span><span>${fmtN(gt)} FCFA</span></div>${notes?`<hr class="tps"><div style="font-size:.68rem;color:var(--muted);">📝 ${notes}</div>`:''}</div><button class="prnt" onclick="window.print()">🖨️ Imprimer</button><br><button onclick="closeOrder();clearCart();" style="margin-top:.6rem;background:transparent;color:var(--muted);border:1px solid var(--creme-d);border-radius:var(--rs);padding:.45rem 1rem;cursor:pointer;font-size:.76rem;">Retour à la boutique</button></div>`;
+  cart={};updCart();
+}
+function openAL(){G('aov').classList.add('on');G('alwrap').style.display='block';G('apwrap').style.display='none';G('apw').value='';pPhoto='';rPZ();}
+function closeA(){G('aov').classList.remove('on');}
+function chkA(){
+  if(G('apw').value===AC){G('alwrap').style.display='none';G('apwrap').style.display='block';pPhoto='';rPZ();rAL();}
+  else{G('apw').value='';G('apw').style.borderColor='var(--rouge)';setTimeout(()=>G('apw').style.borderColor='',1200);shT('❌ Code incorrect');}
+}
+function trigUp(){G('pinp').click();}
+function handlePh(e){
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>5*1024*1024){shT('⚠️ Photo trop lourde (max 5MB)');return;}
+  const r=new FileReader();
+  r.onload=ev=>{pPhoto=ev.target.result;const pp=G('pp'),ph=G('puph');pp.src=pPhoto;pp.classList.add('show');ph.style.display='none';};
+  r.readAsDataURL(f);
+}
+function clrPh(){pPhoto='';rPZ();G('pinp').value='';}
+function rPZ(){const pp=G('pp'),ph=G('puph');if(pp){pp.classList.remove('show');pp.src='';}if(ph)ph.style.display='block';}
+function addProd(){
+  const nom=G('anom').value.trim(),cat=G('acat').value,prix=parseFloat(G('aprix').value),badge=G('abadge').value.trim().toUpperCase(),desc=G('adesc').value.trim();
+  if(!nom){shT('⚠️ Nom requis');return;}if(!prix||prix<=0){shT('⚠️ Prix invalide');return;}
+  const em={cuisses:'🦵',ailes:'🍗',blancs:'🐔',pates:'🍝',gesiers:'🫀'};
+  prods.push({id:nid++,name:nom,cat,prix,photo:pPhoto,emoji:em[cat]||'🍗',desc,badge});
+  svP();rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));
+  ['anom','aprix','abadge','adesc'].forEach(id=>G(id).value='');clrPh();
+  shT('✅ "'+nom+'" ajouté !');
+}
+function delProd(id){
+  const p=prods.find(x=>x.id===id);if(!confirm('Supprimer "'+p.name+'" ?'))return;
+  prods=prods.filter(x=>x.id!==id);delete cart[id];svP();updCart();rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));shT('🗑️ Supprimé');
+}
+function rAL(){
+  G('acnt').textContent=prods.length;
+  G('apl').innerHTML=prods.map(p=>`<div class="api"><div class="api-l">${p.photo?`<img class="api-img" src="${p.photo}" alt="${p.name}">`:`<div class="api-ph">${p.emoji||'🍗'}</div>`}<div><div class="api-n">${p.name}</div><div class="api-p">${fmtN(p.prix)} FCFA</div><div class="api-c">${p.cat}${p.badge?' · '+p.badge:''}</div></div></div><button class="db" onclick="delProd(${p.id})">🗑️ Supprimer</button></div>`).join('');
+}
+let tT;function shT(m){const el=G('toast');el.textContent=m;el.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('on'),2800);}
+renderProds('tous');updCart();
+</script>
+</body>
+</html>
