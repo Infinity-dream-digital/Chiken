@@ -302,7 +302,7 @@ footer strong{color:var(--or);}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
- 
+ import { initializeApp } from "firebase/app";
 // ▼▼▼ REMPLACEZ CES VALEURS PAR VOTRE CONFIG FIREBASE ▼▼▼
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDX8dIcLyABeJ-SE3a7uLEo4aaTC2lbI40",
@@ -313,6 +313,7 @@ const FIREBASE_CONFIG = {
   appId: "1:472248026360:web:00d1d8a6053c2900c0a70d"
 };
 // ▲▲▲ FIN DE LA CONFIG ▲▲▲
+const app = initializeApp(firebaseConfig);
  
 const DP=[
   {id:1,name:'Lot de 4 cuisses',cat:'cuisses',prix:1800,photo:'',emoji:'🦵',desc:'4 cuisses fraîches.',badge:'POPULAIRE'},
