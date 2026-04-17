@@ -299,7 +299,142 @@ footer strong{color:var(--or);}
     </div>
   </div>
 </div>
-<script type="module">
+<script>
+const DP=[
+  {id:1,name:'Lot de 4 cuisses',cat:'cuisses',prix:1800,photo:'',emoji:'🦵',desc:'4 cuisses fraîches.',badge:'POPULAIRE'},
+  {id:2,name:'Lot de 6 cuisses',cat:'cuisses',prix:2500,photo:'',emoji:'🦵',desc:'6 cuisses, portion généreuse.',badge:''},
+  {id:3,name:'Lot de 10 cuisses',cat:'cuisses',prix:3800,photo:'',emoji:'🦵',desc:'Grand lot de 10 cuisses.',badge:'ÉCONOMIQUE'},
+  {id:4,name:'Lot de 6 ailes',cat:'ailes',prix:1200,photo:'',emoji:'🍗',desc:'6 ailes croustillantes.',badge:''},
+  {id:5,name:'Lot de 12 ailes',cat:'ailes',prix:2200,photo:'',emoji:'🍗',desc:'12 ailes pour une soirée.',badge:'POPULAIRE'},
+  {id:6,name:'Blanc x2',cat:'blancs',prix:2000,photo:'',emoji:'🐔',desc:'2 blancs tendres.',badge:''},
+  {id:7,name:'Blanc x4',cat:'blancs',prix:3800,photo:'',emoji:'🐔',desc:'4 blancs pour grillades.',badge:''},
+  {id:8,name:'Pâtes x500g',cat:'pates',prix:1500,photo:'',emoji:'🍝',desc:'500g de pâtes fraîches.',badge:'NOUVEAU'},
+  {id:9,name:'Pâtes x1kg',cat:'pates',prix:2800,photo:'',emoji:'🍝',desc:'1kg de pâtes.',badge:''},
+  {id:10,name:'Gésiers x500g',cat:'gesiers',prix:1000,photo:'',emoji:'🫀',desc:'500g de gésiers frais.',badge:''},
+  {id:11,name:'Gésiers x1kg',cat:'gesiers',prix:1800,photo:'',emoji:'🫀',desc:'1kg de gésiers.',badge:'ÉCONOMIQUE'},
+];
+
+/* ── Storage partagé (visible par tous les visiteurs) ── */
+async function ldP(){
+  try{
+    const res=await window.storage.get('cha_prods_v3',true); // shared=true
+    return res?JSON.parse(res.value):DP;
+  }catch(e){return DP;}
+}
+async function svP(){
+  try{
+    await window.storage.set('cha_prods_v3',JSON.stringify(prods),true); // shared=true
+  }catch(e){console.error('Erreur sauvegarde:',e);}
+}
+
+let prods=[],nid=1,cart={},delMode='retrait',pPhoto='';
+const LF=500,AC='Yann-x14';
+const fmtN=n=>Math.round(n).toLocaleString('fr-FR');
+const G=id=>document.getElementById(id);
+
+function th(p,h=130){
+  if(p.photo)return`<img src="${p.photo}" alt="${p.name}" style="width:100%;height:${h}px;object-fit:cover;display:block;">`;
+  return`<div style="width:100%;height:${h}px;display:flex;align-items:center;justify-content:center;font-size:${h>80?'3.8rem':'1.5rem'};background:linear-gradient(135deg,var(--creme),var(--creme-d));">${p.emoji||'🍗'}</div>`;
+}
+function renderProds(f='tous'){
+  const g=G('pgrid'),cats={cuisses:'Cuisses',ailes:' Ailes',blancs:' Blancs',pates:'Pâtes',gesiers:'Gésiers'};
+  G('slabel').innerHTML=(f==='tous'?'Nos Produits':cats[f]||f)+'<span style="flex:1;height:2px;display:inline-block;background:linear-gradient(90deg,var(--or),transparent);margin-left:.5rem;"></span>';
+  const list=f==='tous'?prods:prods.filter(p=>p.cat===f);
+  if(!list.length){g.innerHTML='<p style="color:var(--muted);font-size:.86rem;padding:.9rem 0;">Aucun article.</p>';return;}
+  g.innerHTML=list.map(p=>{const q=cart[p.id]||0;return`<div class="prod-card" id="card-${p.id}"><div class="prod-thumb">${th(p,130)}${p.badge?`<span class="prod-badge">${p.badge}</span>`:''}</div><div class="prod-body"><div class="prod-name">${p.name}</div><div class="prod-desc">${p.desc||''}</div><div class="prod-foot" id="foot-${p.id}"><div class="prod-price">${fmtN(p.prix)} F</div>${q===0?`<button class="add-btn" onclick="addC(${p.id})">+</button>`:`<div class="qty-ctrl"><button class="qty-btn" onclick="chQ(${p.id},-1)">−</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="chQ(${p.id},1)">+</button></div>`}</div></div></div>`;}).join('');
+}
+function filt(f,el){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('on'));if(el)el.classList.add('on');renderProds(f);}
+function rfFoot(id){
+  const q=cart[id]||0,p=prods.find(x=>x.id===id),f=G('foot-'+id);
+  if(!f||!p)return;
+  f.innerHTML=`<div class="prod-price">${fmtN(p.prix)} F</div>${q===0?`<button class="add-btn" onclick="addC(${id})">+</button>`:`<div class="qty-ctrl"><button class="qty-btn" onclick="chQ(${id},-1)">−</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="chQ(${id},1)">+</button></div>`}`;
+}
+function addC(id){cart[id]=(cart[id]||0)+1;updCart();rfFoot(id);shT('✅ '+prods.find(x=>x.id===id).name+' ajouté !');}
+function chQ(id,d){cart[id]=Math.max(0,(cart[id]||0)+d);if(!cart[id])delete cart[id];updCart();rfFoot(id);}
+function clearCart(){cart={};document.querySelectorAll('.cat-pill').forEach((p,i)=>p.classList.toggle('on',i===0));renderProds('tous');updCart();}
+function gTot(){return Object.entries(cart).reduce((s,[id,q])=>{const p=prods.find(x=>x.id===+id);return s+(p?p.prix*q:0);},0);}
+function gCnt(){return Object.values(cart).reduce((a,b)=>a+b,0);}
+function ciHTML(){return Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';const img=p.photo?`<img class="ti-img" src="${p.photo}" alt="">`:`<div class="ti-ph">${p.emoji||'🍗'}</div>`;return`<div class="ti"><div class="ti-l">${img}<div><div class="ti-name">${p.name}</div><div class="ti-qty">x${q} × ${fmtN(p.prix)} F</div></div></div><span class="ti-price">${fmtN(p.prix*q)} F</span><button class="ti-rm" onclick="chQ(${id},-${q})">✕</button></div>`;}).join('');}
+function updCart(){
+  const tot=gTot(),cnt=gCnt(),lf=delMode==='livraison'?LF:0,gt=tot+lf;
+  const cc=G('cc');cc.textContent=cnt;cnt?cc.classList.add('show'):cc.classList.remove('show');
+  const cb=G('cbody'),cf=G('cfooter');
+  G('cic').textContent=cnt+(cnt<=1?' article':' articles');
+  if(!cnt){cb.innerHTML='<div class="cart-empty"><div style="font-size:2.3rem;margin-bottom:.4rem;">🛒</div><div>Votre panier est vide</div></div>';cf.style.display='none';}
+  else{cb.innerHTML=ciHTML();cf.style.display='block';G('dst').textContent=fmtN(tot)+' FCFA';G('dlv').textContent=delMode==='livraison'?fmtN(LF)+' FCFA':'Gratuit';G('dtot').textContent=fmtN(gt)+' FCFA';}
+  const mb=G('mobbar');
+  if(cnt){mb.style.display='flex';G('mobcnt').textContent=cnt+(cnt<=1?' article':' articles');G('mobtot').textContent=fmtN(gt)+' FCFA';}else mb.style.display='none';
+  G('mobcbody').innerHTML=cnt?ciHTML():'';G('mobtot2').textContent=fmtN(gt)+' FCFA';
+}
+function openMob(){G('mobcs').classList.add('on');}
+function closeMob(){G('mobcs').classList.remove('on');}
+function openOrder(){if(!gCnt()){shT('⚠️ Panier vide');return;}bldRecap();G('oov').classList.add('on');}
+function closeOrder(){G('oov').classList.remove('on');}
+function setDel(m){delMode=m;G('dtr').classList.toggle('on',m==='retrait');G('dlv2').classList.toggle('on',m==='livraison');G('adwrap').style.display=m==='livraison'?'block':'none';bldRecap();updCart();}
+function bldRecap(){
+  const tot=gTot(),lf=delMode==='livraison'?LF:0,gt=tot+lf;
+  const rows=Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';const img=p.photo?`<img src="${p.photo}" style="width:26px;height:26px;border-radius:4px;object-fit:cover;margin-right:.35rem;vertical-align:middle;" alt="">`:`<span style="margin-right:.35rem;">${p.emoji||''}</span>`;return`<div class="rr"><span>${img}${p.name} ×${q}</span><span class="rv">${fmtN(p.prix*q)} F</span></div>`;}).join('');
+  G('orecap').innerHTML=`<div class="rt">🧾 Récapitulatif</div>${rows}${delMode==='livraison'?`<div class="rr"><span>🛵 Livraison</span><span class="rv">${fmtN(LF)} F</span></div>`:''}<div class="rtot"><span>Total</span><span class="rtv">${fmtN(gt)} FCFA</span></div>`;
+}
+function genN(){return'CHA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);}
+function confirmOrder(){
+  const nom=G('onom').value.trim(),tel=G('otel').value.trim(),adr=G('oadr')?.value.trim()||'';
+  if(!nom){shT('⚠️ Nom requis');return;}if(!tel||tel.length<8){shT('⚠️ Téléphone invalide');return;}
+  if(delMode==='livraison'&&!adr){shT('⚠️ Adresse requise');return;}
+  const num=genN(),tot=gTot(),lf=delMode==='livraison'?LF:0,gt=tot+lf,notes=G('onotes').value.trim(),com=G('ocom')?.value||'',now=new Date().toLocaleString('fr-FR');
+  const rows=Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';return`<div class="tpr"><span>${p.name} ×${q}</span><span>${fmtN(p.prix*q)} F</span></div>`;}).join('');
+  G('ombody').innerHTML=`<div class="ss"><div class="si">🎉</div><div class="stit">Commande confirmée !</div><p class="smsg">Merci <strong>${nom}</strong> !<br>${delMode==='livraison'?'🛵 Un livreur viendra sous peu.':'🏪 Venez récupérer en boutique.'}</p><div class="on-num">${num}</div><div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;">Conservez ce numéro</div><div class="tp"><div class="tph"><div class="tpb">🍗 ChickenHouseAbidjan</div><div style="font-size:.65rem;opacity:.55;">${now}</div></div><div class="tpr"><span>N°</span><span><strong>${num}</strong></span></div><div class="tpr"><span>Client</span><span>${nom}</span></div><div class="tpr"><span>Tél</span><span>${tel}</span></div><div class="tpr"><span>Mode</span><span>${delMode==='livraison'?'🛵 Livraison':'🏪 Retrait'}</span></div>${delMode==='livraison'?`<div class="tpr"><span>Adresse</span><span>${adr}${com?', '+com:''}</span></div>`:''}<hr class="tps">${rows}${delMode==='livraison'?`<div class="tpr"><span>Livraison</span><span>${fmtN(LF)} F</span></div>`:''}<hr class="tps"><div class="tptot"><span>TOTAL</span><span>${fmtN(gt)} FCFA</span></div>${notes?`<hr class="tps"><div style="font-size:.68rem;color:var(--muted);">📝 ${notes}</div>`:''}</div><button class="prnt" onclick="window.print()">🖨️ Imprimer</button><br><button onclick="closeOrder();clearCart();" style="margin-top:.6rem;background:transparent;color:var(--muted);border:1px solid var(--creme-d);border-radius:var(--rs);padding:.45rem 1rem;cursor:pointer;font-size:.76rem;">Retour à la boutique</button></div>`;
+  cart={};updCart();
+}
+function openAL(){G('aov').classList.add('on');G('alwrap').style.display='block';G('apwrap').style.display='none';G('apw').value='';pPhoto='';rPZ();}
+function closeA(){G('aov').classList.remove('on');}
+function chkA(){
+  if(G('apw').value===AC){G('alwrap').style.display='none';G('apwrap').style.display='block';pPhoto='';rPZ();rAL();}
+  else{G('apw').value='';G('apw').style.borderColor='var(--rouge)';setTimeout(()=>G('apw').style.borderColor='',1200);shT('❌ Code incorrect');}
+}
+function trigUp(){G('pinp').click();}
+function handlePh(e){
+  const f=e.target.files[0];if(!f)return;
+  if(f.size>5*1024*1024){shT('⚠️ Photo trop lourde (max 5MB)');return;}
+  const r=new FileReader();
+  r.onload=ev=>{pPhoto=ev.target.result;const pp=G('pp'),ph=G('puph');pp.src=pPhoto;pp.classList.add('show');ph.style.display='none';};
+  r.readAsDataURL(f);
+}
+function clrPh(){pPhoto='';rPZ();G('pinp').value='';}
+function rPZ(){const pp=G('pp'),ph=G('puph');if(pp){pp.classList.remove('show');pp.src='';}if(ph)ph.style.display='block';}
+
+async function addProd(){
+  const nom=G('anom').value.trim(),cat=G('acat').value,prix=parseFloat(G('aprix').value),badge=G('abadge').value.trim().toUpperCase(),desc=G('adesc').value.trim();
+  if(!nom){shT('⚠️ Nom requis');return;}if(!prix||prix<=0){shT('⚠️ Prix invalide');return;}
+  const em={cuisses:'🦵',ailes:'🍗',blancs:'🐔',pates:'🍝',gesiers:'🫀'};
+  prods.push({id:nid++,name:nom,cat,prix,photo:pPhoto,emoji:em[cat]||'🍗',desc,badge});
+  await svP(); // ← sauvegarde partagée
+  rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));
+  ['anom','aprix','abadge','adesc'].forEach(id=>G(id).value='');clrPh();
+  shT('✅ "'+nom+'" ajouté !');
+}
+
+async function delProd(id){
+  const p=prods.find(x=>x.id===id);if(!confirm('Supprimer "'+p.name+'" ?'))return;
+  prods=prods.filter(x=>x.id!==id);delete cart[id];
+  await svP(); // ← sauvegarde partagée
+  updCart();rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));shT('🗑️ Supprimé');
+}
+
+function rAL(){
+  G('acnt').textContent=prods.length;
+  G('apl').innerHTML=prods.map(p=>`<div class="api"><div class="api-l">${p.photo?`<img class="api-img" src="${p.photo}" alt="${p.name}">`:`<div class="api-ph">${p.emoji||'🍗'}</div>`}<div><div class="api-n">${p.name}</div><div class="api-p">${fmtN(p.prix)} FCFA</div><div class="api-c">${p.cat}${p.badge?' · '+p.badge:''}</div></div></div><button class="db" onclick="delProd(${p.id})">🗑️ Supprimer</button></div>`).join('');
+}
+let tT;function shT(m){const el=G('toast');el.textContent=m;el.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('on'),2800);}
+
+/* ── Initialisation asynchrone ── */
+(async()=>{
+  prods=await ldP();
+  nid=prods.length?Math.max(...prods.map(p=>p.id))+1:1;
+  renderProds('tous');
+  updCart();
+})();
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
  import { initializeApp } from "firebase/app";
@@ -314,21 +449,7 @@ const FIREBASE_CONFIG = {
 };
 // ▲▲▲ FIN DE LA CONFIG ▲▲▲
 const app = initializeApp(firebaseConfig);
- 
-const DP=[
-  {id:1,name:'Lot de 4 cuisses',cat:'cuisses',prix:1800,photo:'',emoji:'🦵',desc:'4 cuisses fraîches.',badge:'POPULAIRE'},
-  {id:2,name:'Lot de 6 cuisses',cat:'cuisses',prix:2500,photo:'',emoji:'🦵',desc:'6 cuisses, portion généreuse.',badge:''},
-  {id:3,name:'Lot de 10 cuisses',cat:'cuisses',prix:3800,photo:'',emoji:'🦵',desc:'Grand lot de 10 cuisses.',badge:'ÉCONOMIQUE'},
-  {id:4,name:'Lot de 6 ailes',cat:'ailes',prix:1200,photo:'',emoji:'🍗',desc:'6 ailes croustillantes.',badge:''},
-  {id:5,name:'Lot de 12 ailes',cat:'ailes',prix:2200,photo:'',emoji:'🍗',desc:'12 ailes pour une soirée.',badge:'POPULAIRE'},
-  {id:6,name:'Blanc x2',cat:'blancs',prix:2000,photo:'',emoji:'🐔',desc:'2 blancs tendres.',badge:''},
-  {id:7,name:'Blanc x4',cat:'blancs',prix:3800,photo:'',emoji:'🐔',desc:'4 blancs pour grillades.',badge:''},
-  {id:8,name:'Pâtes x500g',cat:'pates',prix:1500,photo:'',emoji:'🍝',desc:'500g de pâtes fraîches.',badge:'NOUVEAU'},
-  {id:9,name:'Pâtes x1kg',cat:'pates',prix:2800,photo:'',emoji:'🍝',desc:'1kg de pâtes.',badge:''},
-  {id:10,name:'Gésiers x500g',cat:'gesiers',prix:1000,photo:'',emoji:'🫀',desc:'500g de gésiers frais.',badge:''},
-  {id:11,name:'Gésiers x1kg',cat:'gesiers',prix:1800,photo:'',emoji:'🫀',desc:'1kg de gésiers.',badge:'ÉCONOMIQUE'},
-];
- 
+
 // ── Détecte si Firebase est configuré ──
 const FB_READY = FIREBASE_CONFIG.apiKey !== "VOTRE_API_KEY";
 let db = null;
@@ -363,135 +484,6 @@ async function svP(){
     shT('❌ Erreur de sauvegarde');
   }
 }
- 
-// ── Variables globales ──
-let prods=[],nid=1,cart={},delMode='retrait',pPhoto='';
-const LF=500, AC='Yann-x14';
-const fmtN=n=>Math.round(n).toLocaleString('fr-FR');
-const G=id=>document.getElementById(id);
- 
-function th(p,h=130){
-  if(p.photo)return`<img src="${p.photo}" alt="${p.name}" style="width:100%;height:${h}px;object-fit:cover;display:block;">`;
-  return`<div style="width:100%;height:${h}px;display:flex;align-items:center;justify-content:center;font-size:${h>80?'3.8rem':'1.5rem'};background:linear-gradient(135deg,var(--creme),var(--creme-d));">${p.emoji||'🍗'}</div>`;
-}
- 
-function renderProds(f='tous'){
-  const g=G('pgrid'),cats={cuisses:'Cuisses',ailes:'Ailes',blancs:'Blancs',pates:'Pâtes',gesiers:'Gésiers'};
-  G('slabel').innerHTML=(f==='tous'?'Nos Produits':cats[f]||f)+'<span style="flex:1;height:2px;display:inline-block;background:linear-gradient(90deg,var(--or),transparent);margin-left:.5rem;"></span>';
-  const list=f==='tous'?prods:prods.filter(p=>p.cat===f);
-  if(!list.length){g.innerHTML='<p style="color:var(--muted);font-size:.86rem;padding:.9rem 0;">Aucun article.</p>';return;}
-  g.innerHTML=list.map(p=>{const q=cart[p.id]||0;return`<div class="prod-card" id="card-${p.id}"><div class="prod-thumb">${th(p,130)}${p.badge?`<span class="prod-badge">${p.badge}</span>`:''}</div><div class="prod-body"><div class="prod-name">${p.name}</div><div class="prod-desc">${p.desc||''}</div><div class="prod-foot" id="foot-${p.id}"><div class="prod-price">${fmtN(p.prix)} F</div>${q===0?`<button class="add-btn" onclick="addC(${p.id})">+</button>`:`<div class="qty-ctrl"><button class="qty-btn" onclick="chQ(${p.id},-1)">−</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="chQ(${p.id},1)">+</button></div>`}</div></div></div>`;}).join('');
-}
- 
-function filt(f,el){document.querySelectorAll('.cat-pill').forEach(p=>p.classList.remove('on'));if(el)el.classList.add('on');renderProds(f);}
- 
-function rfFoot(id){
-  const q=cart[id]||0,p=prods.find(x=>x.id===id),f=G('foot-'+id);
-  if(!f||!p)return;
-  f.innerHTML=`<div class="prod-price">${fmtN(p.prix)} F</div>${q===0?`<button class="add-btn" onclick="addC(${id})">+</button>`:`<div class="qty-ctrl"><button class="qty-btn" onclick="chQ(${id},-1)">−</button><span class="qty-num">${q}</span><button class="qty-btn" onclick="chQ(${id},1)">+</button></div>`}`;
-}
- 
-window.addC=function(id){cart[id]=(cart[id]||0)+1;updCart();rfFoot(id);shT('✅ '+prods.find(x=>x.id===id).name+' ajouté !');}
-window.chQ=function(id,d){cart[id]=Math.max(0,(cart[id]||0)+d);if(!cart[id])delete cart[id];updCart();rfFoot(id);}
-window.clearCart=function(){cart={};document.querySelectorAll('.cat-pill').forEach((p,i)=>p.classList.toggle('on',i===0));renderProds('tous');updCart();}
- 
-function gTot(){return Object.entries(cart).reduce((s,[id,q])=>{const p=prods.find(x=>x.id===+id);return s+(p?p.prix*q:0);},0);}
-function gCnt(){return Object.values(cart).reduce((a,b)=>a+b,0);}
-function ciHTML(){return Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';const img=p.photo?`<img class="ti-img" src="${p.photo}" alt="">`:`<div class="ti-ph">${p.emoji||'🍗'}</div>`;return`<div class="ti"><div class="ti-l">${img}<div><div class="ti-name">${p.name}</div><div class="ti-qty">x${q} × ${fmtN(p.prix)} F</div></div></div><span class="ti-price">${fmtN(p.prix*q)} F</span><button class="ti-rm" onclick="chQ(${id},-${q})">✕</button></div>`;}).join('');}
- 
-function updCart(){
-  const tot=gTot(),cnt=gCnt(),lf=delMode==='livraison'?LF:0,gt=tot+lf;
-  const cc=G('cc');cc.textContent=cnt;cnt?cc.classList.add('show'):cc.classList.remove('show');
-  const cb=G('cbody'),cf=G('cfooter');
-  G('cic').textContent=cnt+(cnt<=1?' article':' articles');
-  if(!cnt){cb.innerHTML='<div class="cart-empty"><div style="font-size:2.3rem;margin-bottom:.4rem;">🛒</div><div>Votre panier est vide</div></div>';cf.style.display='none';}
-  else{cb.innerHTML=ciHTML();cf.style.display='block';G('dst').textContent=fmtN(tot)+' FCFA';G('dlv').textContent=delMode==='livraison'?fmtN(LF)+' FCFA':'Gratuit';G('dtot').textContent=fmtN(gt)+' FCFA';}
-  const mb=G('mobbar');
-  if(cnt){mb.style.display='flex';G('mobcnt').textContent=cnt+(cnt<=1?' article':' articles');G('mobtot').textContent=fmtN(gt)+' FCFA';}else mb.style.display='none';
-  G('mobcbody').innerHTML=cnt?ciHTML():'';G('mobtot2').textContent=fmtN(gt)+' FCFA';
-}
- 
-window.openMob=()=>G('mobcs').classList.add('on');
-window.closeMob=()=>G('mobcs').classList.remove('on');
-window.openOrder=function(){if(!gCnt()){shT('⚠️ Panier vide');return;}bldRecap();G('oov').classList.add('on');}
-window.closeOrder=()=>G('oov').classList.remove('on');
-window.setDel=function(m){delMode=m;G('dtr').classList.toggle('on',m==='retrait');G('dlv2').classList.toggle('on',m==='livraison');G('adwrap').style.display=m==='livraison'?'block':'none';bldRecap();updCart();}
-window.filt=filt;
- 
-function bldRecap(){
-  const tot=gTot(),lf=delMode==='livraison'?LF:0,gt=tot+lf;
-  const rows=Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';const img=p.photo?`<img src="${p.photo}" style="width:26px;height:26px;border-radius:4px;object-fit:cover;margin-right:.35rem;vertical-align:middle;" alt="">`:`<span style="margin-right:.35rem;">${p.emoji||''}</span>`;return`<div class="rr"><span>${img}${p.name} ×${q}</span><span class="rv">${fmtN(p.prix*q)} F</span></div>`;}).join('');
-  G('orecap').innerHTML=`<div class="rt">🧾 Récapitulatif</div>${rows}${delMode==='livraison'?`<div class="rr"><span>🛵 Livraison</span><span class="rv">${fmtN(LF)} F</span></div>`:''}<div class="rtot"><span>Total</span><span class="rtv">${fmtN(gt)} FCFA</span></div>`;
-}
- 
-function genN(){return'CHA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+Math.floor(1000+Math.random()*9000);}
- 
-window.confirmOrder=function(){
-  const nom=G('onom').value.trim(),tel=G('otel').value.trim(),adr=G('oadr')?.value.trim()||'';
-  if(!nom){shT('⚠️ Nom requis');return;}if(!tel||tel.length<8){shT('⚠️ Téléphone invalide');return;}
-  if(delMode==='livraison'&&!adr){shT('⚠️ Adresse requise');return;}
-  const num=genN(),tot=gTot(),lf=delMode==='livraison'?LF:0,gt=tot+lf,notes=G('onotes').value.trim(),com=G('ocom')?.value||'',now=new Date().toLocaleString('fr-FR');
-  const rows=Object.entries(cart).map(([id,q])=>{const p=prods.find(x=>x.id===+id);if(!p)return'';return`<div class="tpr"><span>${p.name} ×${q}</span><span>${fmtN(p.prix*q)} F</span></div>`;}).join('');
-  G('ombody').innerHTML=`<div class="ss"><div class="si">🎉</div><div class="stit">Commande confirmée !</div><p class="smsg">Merci <strong>${nom}</strong> !<br>${delMode==='livraison'?'🛵 Un livreur viendra sous peu.':'🏪 Venez récupérer en boutique.'}</p><div class="on-num">${num}</div><div style="font-size:.7rem;color:var(--muted);margin-top:.35rem;">Conservez ce numéro</div><div class="tp"><div class="tph"><div class="tpb">🍗 ChickenHouseAbidjan</div><div style="font-size:.65rem;opacity:.55;">${now}</div></div><div class="tpr"><span>N°</span><span><strong>${num}</strong></span></div><div class="tpr"><span>Client</span><span>${nom}</span></div><div class="tpr"><span>Tél</span><span>${tel}</span></div><div class="tpr"><span>Mode</span><span>${delMode==='livraison'?'🛵 Livraison':'🏪 Retrait'}</span></div>${delMode==='livraison'?`<div class="tpr"><span>Adresse</span><span>${adr}${com?', '+com:''}</span></div>`:''}<hr class="tps">${rows}${delMode==='livraison'?`<div class="tpr"><span>Livraison</span><span>${fmtN(LF)} F</span></div>`:''}<hr class="tps"><div class="tptot"><span>TOTAL</span><span>${fmtN(gt)} FCFA</span></div>${notes?`<hr class="tps"><div style="font-size:.68rem;color:var(--muted);">📝 ${notes}</div>`:''}</div><button class="prnt" onclick="window.print()">🖨️ Imprimer</button><br><button onclick="closeOrder();clearCart();" style="margin-top:.6rem;background:transparent;color:var(--muted);border:1px solid var(--creme-d);border-radius:var(--rs);padding:.45rem 1rem;cursor:pointer;font-size:.76rem;">Retour à la boutique</button></div>`;
-  cart={};updCart();
-}
- 
-window.openAL=function(){G('aov').classList.add('on');G('alwrap').style.display='block';G('apwrap').style.display='none';G('apw').value='';pPhoto='';rPZ();}
-window.closeA=()=>G('aov').classList.remove('on');
-window.chkA=function(){
-  if(G('apw').value===AC){G('alwrap').style.display='none';G('apwrap').style.display='block';pPhoto='';rPZ();rAL();}
-  else{G('apw').value='';G('apw').style.borderColor='var(--rouge)';setTimeout(()=>G('apw').style.borderColor='',1200);shT('❌ Code incorrect');}
-}
-window.trigUp=()=>G('pinp').click();
- 
-window.handlePh=function(e){
-  const f=e.target.files[0];if(!f)return;
-  if(f.size>5*1024*1024){shT('⚠️ Photo trop lourde (max 5MB)');return;}
-  const r=new FileReader();
-  r.onload=ev=>{pPhoto=ev.target.result;const pp=G('pp'),ph=G('puph');pp.src=pPhoto;pp.classList.add('show');ph.style.display='none';};
-  r.readAsDataURL(f);
-}
-window.clrPh=function(){pPhoto='';rPZ();G('pinp').value='';}
-function rPZ(){const pp=G('pp'),ph=G('puph');if(pp){pp.classList.remove('show');pp.src='';}if(ph)ph.style.display='block';}
- 
-window.addProd=async function(){
-  const nom=G('anom').value.trim(),cat=G('acat').value,prix=parseFloat(G('aprix').value),badge=G('abadge').value.trim().toUpperCase(),desc=G('adesc').value.trim();
-  if(!nom){shT('⚠️ Nom requis');return;}if(!prix||prix<=0){shT('⚠️ Prix invalide');return;}
-  const em={cuisses:'🦵',ailes:'🍗',blancs:'🐔',pates:'🍝',gesiers:'🫀'};
-  prods.push({id:nid++,name:nom,cat,prix,photo:pPhoto,emoji:em[cat]||'🍗',desc,badge});
-  await svP();
-  rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));
-  ['anom','aprix','abadge','adesc'].forEach(id=>G(id).value='');clrPh();
-  shT('✅ "'+nom+'" ajouté !');
-}
- 
-window.delProd=async function(id){
-  const p=prods.find(x=>x.id===id);if(!confirm('Supprimer "'+p.name+'" ?'))return;
-  prods=prods.filter(x=>x.id!==id);delete cart[id];
-  await svP();
-  updCart();rAL();renderProds('tous');document.querySelectorAll('.cat-pill').forEach((x,i)=>x.classList.toggle('on',i===0));shT('🗑️ Supprimé');
-}
- 
-function rAL(){
-  G('acnt').textContent=prods.length;
-  G('apl').innerHTML=prods.map(p=>`<div class="api"><div class="api-l">${p.photo?`<img class="api-img" src="${p.photo}" alt="${p.name}">`:`<div class="api-ph">${p.emoji||'🍗'}</div>`}<div><div class="api-n">${p.name}</div><div class="api-p">${fmtN(p.prix)} FCFA</div><div class="api-c">${p.cat}${p.badge?' · '+p.badge:''}</div></div></div><button class="db" onclick="delProd(${p.id})">🗑️ Supprimer</button></div>`).join('');
-}
- 
-let tT;
-function shT(m){const el=G('toast');el.textContent=m;el.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>el.classList.remove('on'),2800);}
-window.shT=shT;
- 
-// ── Initialisation ──
-(async()=>{
-  prods = await ldP();
-  nid = prods.length ? Math.max(...prods.map(p=>p.id))+1 : 1;
-  renderProds('tous');
-  updCart();
-  // Cache le loading screen
-  const ls = G('loadscreen');
-  ls.classList.add('hide');
-  setTimeout(()=>ls.style.display='none', 450);
-})();
 </script>
 </body>
 </html>
