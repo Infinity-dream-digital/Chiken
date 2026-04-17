@@ -300,6 +300,49 @@ footer strong{color:var(--or);}
   </div>
 </div>
 <script>
+
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+ import { initializeApp } from "firebase/app";
+// ▼▼▼ REMPLACEZ CES VALEURS PAR VOTRE CONFIG FIREBASE ▼▼▼
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDX8dIcLyABeJ-SE3a7uLEo4aaTC2lbI40",
+  authDomain: "chikenhouseabidjan.firebaseapp.com",
+  projectId: "chikenhouseabidjan",
+  storageBucket: "chikenhouseabidjan.firebasestorage.app",
+  messagingSenderId: "472248026360",
+  appId: "1:472248026360:web:00d1d8a6053c2900c0a70d"
+};
+// ▲▲▲ FIN DE LA CONFIG ▲▲▲
+const app = initializeApp(firebaseConfig);
+
+// ── Détecte si Firebase est configuré ──
+const FB_READY = FIREBASE_CONFIG.apiKey !== "VOTRE_API_KEY";
+let db = null;
+ 
+if(FB_READY){
+  const app = initializeApp(FIREBASE_CONFIG);
+  db = getFirestore(app);
+} else {
+  document.getElementById('cfg-banner').style.display='block';
+}
+ 
+async function ldP(){
+  if(!FB_READY) return DP;
+  try{
+    const snap = await getDoc(doc(db,'boutique','produits'));
+    if(snap.exists()) return snap.data().liste;
+    // Premier chargement : on pousse les produits par défaut
+    await setDoc(doc(db,'boutique','produits'),{liste:DP});
+    return DP;
+  }catch(e){
+    console.error('Firebase load error:',e);
+    return DP;
+  }
+}
+ 
+async function svP(){
+  
 const DP=[
   {id:1,name:'Lot de 4 cuisses',cat:'cuisses',prix:1800,photo:'',emoji:'🦵',desc:'4 cuisses fraîches.',badge:'POPULAIRE'},
   {id:2,name:'Lot de 6 cuisses',cat:'cuisses',prix:2500,photo:'',emoji:'🦵',desc:'6 cuisses, portion généreuse.',badge:''},
